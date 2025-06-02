@@ -174,9 +174,15 @@
       selector: 'body',
       padding: 0
     },
-    sanitize : true,
-    sanitizeFn : null,
-    whiteList : DefaultWhitelist
+    sanitize: true,
+    // Always use DOMPurify if available, fallback to built-in sanitizer
+    sanitizeFn: function(html) {
+      if (typeof window !== 'undefined' && window.DOMPurify) {
+        return window.DOMPurify.sanitize(html);
+      }
+      return sanitizeHtml(html, this.whiteList, null);
+    },
+    whiteList: DefaultWhitelist
   }
 
   Tooltip.prototype.init = function (type, element, options) {
@@ -642,6 +648,9 @@
   }
 
   Tooltip.prototype.sanitizeHtml = function (unsafeHtml) {
+    if (typeof window !== 'undefined' && window.DOMPurify) {
+      return window.DOMPurify.sanitize(unsafeHtml)
+    }
     return sanitizeHtml(unsafeHtml, this.options.whiteList, this.options.sanitizeFn)
   }
 
